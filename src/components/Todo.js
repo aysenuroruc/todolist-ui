@@ -9,7 +9,7 @@ export default class Todo extends React.Component {
   constructor(args) {
 	  super(args);
 	  this.state={todolists:[], selected: -1};
-	  fetch('/todolists', {
+	  fetch('http://localhost:8080/todolists', {
 		  method: 'GET',
 		  headers: {
 			'Accept': 'application/json',
@@ -30,7 +30,7 @@ export default class Todo extends React.Component {
   saveTodoList = e => {
 	  console.log("Saving");
 	  
-	  fetch('/todolists/saveall', {
+	  fetch('http://localhost:8080/todolists/saveall', {
 		  method: 'POST',
 		  headers: {
 			'Accept': 'application/json',
@@ -44,7 +44,7 @@ export default class Todo extends React.Component {
 		});
   }
   removeTodoList = e => {
-	  fetch('/todolists', {
+	  fetch('http://localhost:8080/todolists', {
 		  method: 'POST',
 		  headers: {
 			'Accept': 'application/json',
@@ -56,11 +56,23 @@ export default class Todo extends React.Component {
 			console.log(res);
 			
 		});
-  }
-  
+	}
+	removeTodo = (index) => {
+		console.log(index);
+		let todolist = this.state.todolists[this.state.selected];
+		//console.log(todolist)
+		todolist.todos.splice(index, 1)
+		//console.log(todolist)
+		console.log(this.state.todolists[this.state.selected])
+		let selected=this.state.selected;
+		this.setState({todolists: this.state.todolists, selected: selected});
+		this.saveTodoList();
+
+	}
+	
   selectTodoList = (id, index) => {
 	  
-	  fetch('/todolists/' + id, {
+	  fetch('http://localhost:8080/todolists/' + id, {
 		  method: 'GET',
 		  headers: {
 			'Accept': 'application/json',
@@ -166,7 +178,8 @@ export default class Todo extends React.Component {
 						<TodoItem
 						  todo={item}
 						  removeTodo={this.removeTodo}
-						  setDate={this.setDate}
+							setDate={this.setDate}
+							index = {index}
 						/>
 					  )}
 					/>
@@ -191,7 +204,7 @@ export default class Todo extends React.Component {
 class TodoItem extends React.Component {
   remove = () => {
     // Remove this TodoItem
-    this.props.removeTodo(this.props.todo.index);
+    this.props.removeTodo(this.props.index);
   };
 
   handleDateChange = (date, dateString) => {
