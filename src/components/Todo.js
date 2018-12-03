@@ -9,7 +9,10 @@ export default class Todo extends React.Component {
   constructor(args) {
 	  super(args);
 	  this.state={todolists:[], selected: -1};
-	  fetch('http://localhost:8080/todolists', {
+	  this.fetchAll();
+  }
+  fetchAll(){
+		fetch('http://localhost:8080/todolists', {
 		  method: 'GET',
 		  headers: {
 			'Accept': 'application/json',
@@ -25,8 +28,7 @@ export default class Todo extends React.Component {
 			this.setState({todolists: body.payload, selected: this.state.selected});
 			console.info(this.state);
 		});
-  }
-  
+	}
   saveTodoList = e => {
 	  console.log("Saving");
 	  
@@ -40,21 +42,24 @@ export default class Todo extends React.Component {
 		  body: JSON.stringify(this.state.todolists)
 		}).then((res)=>{
 			console.log(res);
+			this.fetchAll();
 			
 		});
   }
-  removeTodoList = e => {
-	  fetch('http://localhost:8080/todolists', {
-		  method: 'POST',
+  removeTodoList = ( index, id) => {
+		//console.log(e); 
+		console.log(index); 
+	  fetch('http://localhost:8080/todolists/'+ id, {
+		  method: 'DELETE',
 		  headers: {
 			'Accept': 'application/json',
 			'Content-Type': 'application/json',
 			'Authorization': 'Basic dXNlcjpwYXNzd29yZA=='
-		  },
-		  body: JSON.stringify(this.state.todos)
-		}).then((res)=>{
+			}
+				}).then((res)=>{
 			console.log(res);
-			
+			let todoLists=this.state.todolists.splice(index,1)
+			this.setState({todolists: todoLists, selected: this.state.selected});
 		});
 	}
 	removeTodo = (index) => {
@@ -114,7 +119,7 @@ export default class Todo extends React.Component {
 	todolists[this.state.selected].todos = newTodos;
     this.setState({
       todolists: this.state.todolists,
-	  selecetd: this.state.selected
+	  selected: this.state.selected
     });
 
     // Clear input
@@ -154,7 +159,13 @@ export default class Todo extends React.Component {
 			  locale={{ emptyText: "No todo list" }}
 			  dataSource={this.state.todolists}
 			  renderItem={(item, index) => (
-				<a onClick={()=>this.selectTodoList(item.id, index)} id={item.id} index={index}>{item.title}</a>
+				<div> <a onClick={()=>this.selectTodoList(item.id, index)} id={item.id} index={index}>{item.title}</a> 
+				 <Icon
+            type="close-circle"
+            theme="filled"
+            onClick={()=> this.removeTodoList(index ,item.id)}
+          />
+				<br></br></div>
 			  )}
 			/>
 		  </Col>
